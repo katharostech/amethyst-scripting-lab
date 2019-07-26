@@ -1,0 +1,12 @@
+[package]
+name = "amethyst-scripting-schema"
+version = "0.1.0"
+authors = ["Zicklag <zicklag@katharostech.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+peg = { git = "https://github.com/kevinmehall/rust-peg.git", rev = "096b264"}
+strum = "0.15.0"
+strum_macros = "0.15.0"
