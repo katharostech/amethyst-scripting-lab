@@ -32,6 +32,3 @@ enum PlayerState {
     Falling,
     Jumping,
 }
-
-// TODO:
-// - References?
