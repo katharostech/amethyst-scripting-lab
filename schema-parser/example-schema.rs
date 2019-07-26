@@ -3,14 +3,9 @@
 
 // Line comments are supported
 
-// This defines the type that contains the root component data. It *must* be
-// defined as `type Component = TypeName`. It is the only `type` statement
-// allowed. The purpose is to distinguish which struct out of the ones in the
-// schema is to be used as the component struct.
-type Component = Player;
-
-// This is the player object
-struct Player {
+// This is the player object. Player is defined as a component which is the same
+// as a struct except it creates a scripted component.
+component Player {
     position: Position,
     state: PlayerState,
     // You can have type parameters:

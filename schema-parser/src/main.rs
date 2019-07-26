@@ -66,12 +66,13 @@ grammar schema_parser() for str {
 
     // A struct definition
     rule struct() -> Expr = 
-        w() "struct" w() struct_type:struct_type() w() "{" wn()
+        w() def:$("struct" / "component") w() struct_type:struct_type() w() "{" wn()
             fields:struct_field() ** ("," wn()) ","? wn()
         "}" {
             Expr::Struct(Struct {
                 struct_type,
-                fields
+                fields,
+                is_component: if def == "component" { true } else { false }
             })
         }
 

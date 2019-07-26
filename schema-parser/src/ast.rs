@@ -11,6 +11,7 @@ pub enum Expr {
 pub struct Struct {
     pub struct_type: Type,
     pub fields: Vec<Field>,
+    pub is_component: bool,
 }
 
 #[derive(Debug)]
