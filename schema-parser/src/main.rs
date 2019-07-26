@@ -11,7 +11,6 @@ grammar schema_parser() for str {
     /// Parse the schema into a set of `Expr`'s.
     pub rule schema() -> Vec<Expr> =
         wn() exprs:(
-            component_type() /
             struct() /
             enum()
         ) ** wn() wn() ![_] { exprs }
@@ -58,12 +57,6 @@ grammar schema_parser() for str {
             Primitive::from_str(type_name).unwrap()
         }
 
-    // The component type definition
-    rule component_type() -> Expr =
-        w() "type" w() "Component" w() "=" w() name:$type_name() ";" {
-            Expr::ComponentName(name.into())
-        }
-
     // A struct definition
     rule struct() -> Expr = 
         w() def:$("struct" / "component") w() struct_type:struct_type() w() "{" wn()
@@ -72,7 +65,7 @@ grammar schema_parser() for str {
             Expr::Struct(Struct {
                 struct_type,
                 fields,
-                is_component: if def == "component" { true } else { false }
+                is_component: def == "component"
             })
         }
 
