@@ -12,7 +12,8 @@ grammar schema_parser() for str {
     pub rule schema() -> Vec<Expr> =
         wn() exprs:(
             component_type() /
-            struct()
+            struct() /
+            enum()
         ) ** wn() wn() ![_] { exprs }
 
     // Whitespace character
@@ -59,14 +60,14 @@ grammar schema_parser() for str {
 
     // The component type definition
     rule component_type() -> Expr =
-        w() "type" w() "Component" w() "=" w() name:$(type_name()) ";" {
+        w() "type" w() "Component" w() "=" w() name:$type_name() ";" {
             Expr::ComponentName(name.into())
         }
 
     // A struct definition
     rule struct() -> Expr = 
-        w() "struct" w() struct_type:(struct_type()) w() "{" wn()
-            fields:(struct_field()) ** ("," wn()) ","? wn()
+        w() "struct" w() struct_type:struct_type() w() "{" wn()
+            fields:struct_field() ** ("," wn()) ","? wn()
         "}" {
             Expr::Struct(Struct {
                 struct_type,
@@ -76,7 +77,7 @@ grammar schema_parser() for str {
 
     // A non-primitive struct or field type
     rule struct_type() -> Type =
-        type_name:$(type_name()) params:type_parameters() {
+        type_name:$type_name() params:type_parameters() {
             Type {
                 type_name: type_name.into(),
                 type_parameters: params
@@ -85,11 +86,11 @@ grammar schema_parser() for str {
 
     // A struct type parameter
     rule type_parameters() -> Option<Vec<Kind>> =
-        ("<" params:(field_kind() ** ("," w())) ">" { params })?
+        ("<" params:field_kind() ** ("," w()) ">" { params })?
 
     // A struct field
     rule struct_field() -> Field =
-        name:$(identifier()) w() ":" w() field_kind:field_kind() { 
+        name:$identifier() w() ":" w() field_kind:field_kind() { 
             Field {
                 name: name.into(),
                 field_kind,
@@ -100,6 +101,17 @@ grammar schema_parser() for str {
     rule field_kind() -> Kind =
         field_type:struct_type() { Kind::Type(field_type) } /
         primitive_type:primitive() { Kind::Primitive(primitive_type) }
+
+    // An Enum
+    rule enum() -> Expr =
+        w() "enum" w() name:$type_name() w() "{" wn()
+            variants:$type_name() ** ("," wn()) ","? wn()
+        "}" {
+            Expr::Enum(Enum {
+                name: name.into(),
+                variants: variants.iter().map(|&s| s.into()).collect(),
+            })
+        }
 }}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {

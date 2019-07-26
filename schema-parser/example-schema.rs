@@ -12,6 +12,7 @@ type Component = Player;
 // This is the player object
 struct Player {
     position: Position,
+    state: PlayerState,
     // You can have type parameters:
     life: Option<u8>, // Struct fields can have trailing commas
     //          ^^^^
@@ -29,6 +30,13 @@ struct HashMap<T, U> {
     values: Vec<U>,
 }
 
+enum PlayerState {
+    Walking,
+    Running,
+    Standing,
+    Falling,
+    Jumping,
+}
+
 // TODO:
-// - Enums
-// - Strings?
+// - References?

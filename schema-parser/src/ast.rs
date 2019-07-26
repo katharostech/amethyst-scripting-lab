@@ -4,6 +4,7 @@ use strum_macros::EnumString;
 pub enum Expr {
     ComponentName(String),
     Struct(Struct),
+    Enum(Enum),
 }
 
 #[derive(Debug)]
@@ -61,4 +62,10 @@ pub enum Primitive {
     F64,
     #[strum(serialize = "char")]
     Char,
+}
+
+#[derive(Debug)]
+pub struct Enum {
+    pub name: String,
+    pub variants: Vec<String>
 }
