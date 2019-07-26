@@ -11,7 +11,6 @@ grammar schema_parser() for str {
     /// Parse the schema into a set of `Expr`'s.
     pub rule schema() -> Vec<Expr> =
         wn() exprs:(
-            line_comment() /
             component_type() /
             struct()
         ) ** wn() wn() ![_] { exprs }
@@ -20,11 +19,20 @@ grammar schema_parser() for str {
     // Low level helper tokens
     //
 
-    // Whitespace without including newlines
-    rule w() = ['\t' | ' ']*
+    // Whitespace character
+    rule whitespace_char() = ['\t' | ' ']
 
-    // Whitespace including newlines
-    rule wn() = ['\t' | ' ' | '\n']*
+    // Line comment
+    rule line_comment() = "//" (!"\n" [_])* ("\n" / ![_])
+
+    // Inline comment
+    rule inline_comment() = "/*" (!"*/" [_])* "*/"
+
+    // Whitespace including comments
+    rule w() = (whitespace_char() / inline_comment())*
+
+    // Whitespace including newlines and line comments
+    rule wn() = (whitespace_char() / "\n" / inline_comment() / line_comment())*
 
     // The name of a type
     rule type_name() = ['A'..='Z'] ['a'..='z' | 'A'..='Z' | '0'..='9']*
@@ -33,7 +41,6 @@ grammar schema_parser() for str {
     rule identifier() = ['a'..='z'] ['a'..='z' | 'A'..='Z' | '0'..='9' | '_']*
 
     // A primitive type
-    // TODO: More types
     rule primitive() -> Kind =
         type_name:$(
             "bool" /
@@ -57,10 +64,6 @@ grammar schema_parser() for str {
     //
     // Expression parsers
     //
-
-    // Parse a line comment. Each line will be a separate comment `Expr`.
-    rule line_comment() -> Expr =
-        w() "//" " "? comment:$([x if x != '\n']*) ("\n" / ![_]) { Expr::Comment(comment.into()) }
 
     // The component type definition
     rule component_type() -> Expr =

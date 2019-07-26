@@ -2,7 +2,6 @@ use strum_macros::EnumString;
 
 #[derive(Debug)]
 pub enum Expr {
-    Comment(String),
     ComponentName(String),
     Struct(Struct),
 }
