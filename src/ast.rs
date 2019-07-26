@@ -8,7 +8,7 @@ pub enum Expr {
 
 #[derive(Debug)]
 pub struct Struct {
-    pub name: String,
+    pub struct_type: Type,
     pub fields: Vec<Field>,
 }
 
@@ -27,6 +27,7 @@ pub enum Kind {
 #[derive(Debug)]
 pub struct Type {
     pub type_name: String,
+    pub type_parameters: Option<Vec<Kind>>
 }
 
 #[derive(Debug)]

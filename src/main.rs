@@ -15,10 +15,6 @@ grammar schema_parser() for str {
             struct()
         ) ** wn() wn() ![_] { exprs }
 
-    //
-    // Low level helper tokens
-    //
-
     // Whitespace character
     rule whitespace_char() = ['\t' | ' ']
 
@@ -41,7 +37,7 @@ grammar schema_parser() for str {
     rule identifier() = ['a'..='z'] ['a'..='z' | 'A'..='Z' | '0'..='9' | '_']*
 
     // A primitive type
-    rule primitive() -> Kind =
+    rule primitive() -> Primitive =
         type_name:$(
             "bool" /
             "u8" /
@@ -58,12 +54,8 @@ grammar schema_parser() for str {
             "f64" /
             "char"
         ) {
-            Kind::Primitive(Primitive::from_str(type_name).unwrap())
+            Primitive::from_str(type_name).unwrap()
         }
-
-    //
-    // Expression parsers
-    //
 
     // The component type definition
     rule component_type() -> Expr =
@@ -71,38 +63,47 @@ grammar schema_parser() for str {
             Expr::ComponentName(name.into())
         }
 
-    // Parse a struct definition
+    // A struct definition
     rule struct() -> Expr = 
-        w() "struct" w() name:$(type_name()) w() "{" wn()
+        w() "struct" w() struct_type:(struct_type()) w() "{" wn()
             fields:(struct_field()) ** ("," wn()) ","? wn()
         "}" {
             Expr::Struct(Struct {
-                name: name.into(),
+                struct_type,
                 fields
             })
         }
 
-    // Parse a struct field
+    // A non-primitive struct or field type
+    rule struct_type() -> Type =
+        type_name:$(type_name()) params:type_parameters() {
+            Type {
+                type_name: type_name.into(),
+                type_parameters: params
+            }
+        }
+
+    // A struct type parameter
+    rule type_parameters() -> Option<Vec<Kind>> =
+        ("<" params:(field_kind() ** ("," w())) ">" { params })?
+
+    // A struct field
     rule struct_field() -> Field =
-        name:$(identifier()) w() ":" w() field_kind:(field_type() / primitive()) { 
+        name:$(identifier()) w() ":" w() field_kind:field_kind() { 
             Field {
                 name: name.into(),
                 field_kind,
             }
         }
 
-    // Parse a field "Type" kind, i.e. any field with a non-primitive type
-    rule field_type() -> Kind =
-        type_name:$(type_name()) {
-            Kind::Type(Type {
-                type_name: type_name.into()
-            })
-        }
-
+    // A field kind
+    rule field_kind() -> Kind =
+        field_type:struct_type() { Kind::Type(field_type) } /
+        primitive_type:primitive() { Kind::Primitive(primitive_type) }
 }}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let schema = schema_parser::schema(include_str!("./example-schema.rs"))?;
+    let schema = schema_parser::schema(include_str!("../example-schema.rs"))?;
 
     println!("{:#?}", schema);
 
