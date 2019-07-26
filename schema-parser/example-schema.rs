@@ -1,27 +1,34 @@
-// This is not a real rust file, but a schema definition file that defines the
-// structure of a scripted component.
+// This is not a real rust file, but an example schema definition file that
+// defines the structure of a scripted component.
 
-// This states which type contains the root component data. It *must* be defined
-// as `type Component = TypeName`. It is the only `type` statement allowed.
-type Component = Position;
+// Line comments are supported
 
-// Define component data struct.
+// This defines the type that contains the root component data. It *must* be
+// defined as `type Component = TypeName`. It is the only `type` statement
+// allowed. The purpose is to distinguish which struct out of the ones in the
+// schema is to be used as the component struct.
+type Component = Player;
+
+// This is the player object
+struct Player {
+    position: Position,
+    // You can have type parameters:
+    life: Option<u8>, // Struct fields can have trailing commas
+    //          ^^^^
+}
+
 struct Position {
-    x: i32,
-    /* Inline and
-     * multiline comment
-     * */ y: i8,
-    number: f32,
-    boolean: bool,
-    custom: Awesomeness, // Trailing commas
+    x: /* You can stick inline,
+        * multiline comments anywhere */ f32,
+    y: f32 // Trailing commas aren't required
 }
 
-// Another type used by the component data.
-struct Awesomeness<T, U> {
-    test: AnotherType,
-    value: u32 // No trailing comma
+// Structs can have type parameters, too.
+struct HashMap<T, U> {
+    keys: Vec<T>,
+    values: Vec<U>,
 }
 
-struct AnotherType {
-    nothing_special: char
-}
+// TODO:
+// - Enums
+// - Strings?
