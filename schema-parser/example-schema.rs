@@ -5,7 +5,8 @@
 
 // This is the player object. Player is defined as a component which is the same
 // as a struct except it creates a scripted component.
-component Player {
+#[Component]
+struct Player {
     position: Position,
     state: PlayerState,
     // You can have type parameters:
